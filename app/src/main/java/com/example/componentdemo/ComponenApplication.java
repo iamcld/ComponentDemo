@@ -13,5 +13,6 @@ public class ComponenApplication extends Application {
         super.onCreate();
         LineLog.INSTANCE.d(TAG, "onCreate()");
         ARouter.init(this);
+        ARouter.openDebug();
     }
 }

@@ -23,6 +23,13 @@ android {
         versionName cfg.android.versionName
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // 注解处理器
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [AROUTER_MODULE_NAME: project.getName()]
+            }
+        }
     }
 
     buildTypes {
@@ -35,9 +42,13 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-    kotlinOptions {
-        jvmTarget = '1.8'
+
+    if (cfg.isDebug) {
+        kotlinOptions {
+            jvmTarget = '1.8'
+        }
     }
+
 
     sourceSets {
         main {
@@ -57,6 +68,9 @@ dependencies {
     // 业务组件依赖基础组件，不需要单独添加依赖库
     // implementation是不可传递的依赖。业务组件使用的库，无需再传递给其他组件。api是可传递的依赖
     implementation project(':modulesBase:libBase')
+
+    // 注解处理器
+    annotationProcessor cfg.libARouterCompiler
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.3.1'

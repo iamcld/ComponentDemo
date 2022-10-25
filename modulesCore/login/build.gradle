@@ -22,14 +22,16 @@ android {
         versionName cfg.android.versionName
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // 注解处理器
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [AROUTER_MODULE_NAME: project.getName()]
+            }
+        }
     }
 
-    //
-//    javaCompileOptions {
-//        annotationProcessorOptions {
-//            arguments = [moduleName: project.getName()]
-//        }
-//    }
+
 
     buildTypes {
         release {
