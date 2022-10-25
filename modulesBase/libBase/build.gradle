@@ -1,0 +1,44 @@
+def cfg = rootProject.ext
+
+// 通过apply方式，可以动态的指定是application还是library
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion cfg.android.compileSdkVersion
+    buildToolsVersion cfg.android.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion cfg.android.minSdkVersion
+        targetSdkVersion cfg.android.targetSdkVersion
+        versionCode cfg.android.versionCode
+        versionName cfg.android.versionName
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+
+    // 基础组件库需要把依赖库传递给其他组件，所以此处使用api方式
+    // implementation是不可传递的依赖。api是可传递的依赖，可将依赖库向上传递给其他组件，防止重复依赖
+    api cfg.library.appcompat
+    api cfg.library.material
+    api cfg.library.constraintlayout
+    api cfg.libARouter
+
+
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+}

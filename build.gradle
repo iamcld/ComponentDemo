@@ -1,0 +1,65 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    ext {
+        kotlin_version = '1.5.0'
+    }
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:4.2.1"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+// 各组件统一配置
+ext {
+
+    // 当它为true时，调试模式，业务组件可以切换为application，可以单独运行。如果为false，正式打包模式，所有组件均为library形式打包到apk中
+    isDebug = true
+
+    android = [
+            compileSdkVersion: 30,
+            minSdkVersion    : 24,
+            targetSdkVersion : 30,
+            buildToolsVersion: "30.0.2",
+            versionCode      : 1,
+            versionName      : "1.0"
+    ]
+
+    applicationId = [
+            "app"   : "com.example.componentdemo",
+            "main"  : "com.example.module.main",
+            "login"  : "com.example.module.login",
+            "lifecycle"  : "com.example.lifecycle"
+    ]
+
+    // Android sdk中的库，可以单独放在数组中
+    library = [
+            "appcompat"         :   "androidx.appcompat:appcompat:1.1.0",
+            "material"          :   "com.google.android.material:material:1.2.1",
+            "constraintlayout"  :   "androidx.constraintlayout:constraintlayout:2.0.1"
+    ]
+
+    // 第三方的库
+    libARouter = "com.alibaba:arouter-api:1.5.2"
+    // arouter注解处理器
+    libARouterCompiler = "com.alibaba:arouter-compiler:1.5.2"
+    libGosn = "com.google.code.gosn:gosn:2.8.6"
+
+}
