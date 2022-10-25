@@ -2,6 +2,7 @@ def cfg = rootProject.ext
 
 // 通过apply方式，可以动态的指定是application还是library
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion cfg.android.compileSdkVersion

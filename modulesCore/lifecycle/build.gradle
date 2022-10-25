@@ -13,11 +13,14 @@ android {
     buildToolsVersion cfg.android.buildToolsVersion
 
     defaultConfig {
-        applicationId "com.example.lifecycle"
+        if (cfg.isDebug) {
+            // 调试模式下，才有applicationId
+            applicationId cfg.applicationId.lifecycle
+        }
         minSdkVersion cfg.android.minSdkVersion
         targetSdkVersion cfg.android.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode cfg.android.versionCode
+        versionName cfg.android.versionName
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -35,9 +38,25 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+
+    sourceSets {
+        main {
+            if(cfg.isDebug) {
+                // 调试模式时，该组件为application，所以清单文件中需要定义应用类型的xml文件
+                manifest.srcFile 'src/main/debug/AndroidManifest.xml'
+            } else {
+                // 正式模式时，该组件为library，所以清单文件中需要定义库类型的xml文件
+                manifest.srcFile 'src/main/AndroidManifest.xml'
+            }
+        }
+    }
 }
 
 dependencies {
+
+    // 业务组件依赖基础组件，不需要单独添加依赖库
+    // implementation是不可传递的依赖。业务组件使用的库，无需再传递给其他组件。api是可传递的依赖
+    implementation project(':modulesBase:libBase')
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.3.1'
