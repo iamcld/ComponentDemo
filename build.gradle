@@ -31,7 +31,7 @@ task clean(type: Delete) {
 ext {
 
     // 当它为true时，调试模式，业务组件可以切换为application，可以单独运行。如果为false，正式打包模式，所有组件均为library形式打包到apk中
-    isDebug = false
+    isDebug = true
 
     android = [
             compileSdkVersion: 31,
