@@ -1,8 +1,9 @@
 rootProject.name = "ComponentDemo"
-include ':app'
-include ':modulesCore:main'
-include ':modulesBase:libBase'
-include ':modulesPublic:modulePay'
-include ':modulesCore:login'
-include ':modulesCore:lifecycle'
-include ':modulesCore:livedata'
+include ':app'//App壳
+include ':modulesCore:main'//业务组件，可单独运行
+include ':modulesBase:libBase'//公共库模块
+include ':modulesPublic:modulePay'// 功能组件库，可被多组件公用
+include ':modulesCore:login'//业务组件，可单独运行
+include ':modulesCore:lifecycle'//业务组件，可单独运行
+include ':modulesCore:livedata'//业务组件，可单独运行
+include ':modulesCore:viewmodel'
