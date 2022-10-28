@@ -43,7 +43,8 @@ ext {
             "app"   : "com.example.componentdemo",
             "main"  : "com.example.module.main",
             "login"  : "com.example.module.login",
-            "lifecycle"  : "com.example.lifecycle"
+            "lifecycle"  : "com.example.lifecycle",
+            "livedata"  : "com.example.livedata"
     ]
 
     // Android sdk中的库，可以单独放在数组中
