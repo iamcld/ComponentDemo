@@ -1,7 +1,7 @@
 def cfg = rootProject.ext
 
 // 通过apply方式，可以动态的指定是application还是library
-if(cfg.isDebug) {
+if(isModuleRun.toBoolean()) {
     apply plugin: 'com.android.application'
 } else {
     apply plugin: 'com.android.library'
@@ -12,7 +12,7 @@ android {
     buildToolsVersion cfg.android.buildToolsVersion
 
     defaultConfig {
-        if (cfg.isDebug) {
+        if (isModuleRun.toBoolean()) {
             // 调试模式下，才有applicationId
             applicationId cfg.applicationId.login
         }
@@ -46,7 +46,7 @@ android {
 
     sourceSets {
         main {
-            if(cfg.isDebug) {
+            if(isModuleRun.toBoolean()) {
                 // 调试模式时，该组件为application，所以清单文件中需要定义应用类型的xml文件
                 manifest.srcFile 'src/main/debug/AndroidManifest.xml'
             } else {

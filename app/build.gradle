@@ -38,7 +38,7 @@ dependencies {
     implementation project(':modulesBase:libBase')
 
     // 正式打包情况下，依赖业务组件
-    if(!cfg.isDebug){
+    if(!isModuleRun.toBoolean()){
         implementation project(':modulesCore:main')
         implementation project(':modulesCore:login')
     }
