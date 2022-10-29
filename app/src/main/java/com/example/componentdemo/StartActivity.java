@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.alibaba.android.arouter.launcher.ARouter;
+//import com.example.ffmpeg.NativeLib;
 import com.example.libbase.LineLog;
 
 /**
@@ -19,6 +20,7 @@ public class StartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         LineLog.INSTANCE.d(TAG, "onCreate()");
+//        new NativeLib().stringFromJNI();
 
         // debug模式时，不会把login和main组件添加到app模块下，故此次不会跳转。
         // 正式模式时，才会跳转

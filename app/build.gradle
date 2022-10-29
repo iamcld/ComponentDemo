@@ -41,6 +41,7 @@ dependencies {
     if(!isModuleRun.toBoolean()){
         implementation project(':modulesCore:main')
         implementation project(':modulesCore:login')
+        implementation project(':modulesCore:ffmpeg')
     }
 
 

@@ -7,3 +7,4 @@ include ':modulesCore:login'//业务组件，可单独运行
 include ':modulesCore:lifecycle'//业务组件，可单独运行
 include ':modulesCore:livedata'//业务组件，可单独运行
 include ':modulesCore:viewmodel'
+include ':modulesCore:ffmpeg'
