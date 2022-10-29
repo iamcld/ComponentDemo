@@ -46,6 +46,7 @@ ext {
             "lifecycle"  : "com.example.lifecycle",
             "livedata"  : "com.example.livedata",
             "viewmodel"  : "com.example.viewmodel",
+            "viewbinding"  : "com.example.viewbinding",
             "ffmpeg"  : "com.example.ffmpeg"
     ]
 

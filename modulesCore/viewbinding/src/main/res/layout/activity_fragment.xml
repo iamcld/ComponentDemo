@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ViewBindingActivity">
+
+    <Button
+        android:id="@+id/btn_add_one"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="addOneClick"
+        android:background="#00ff00"
+        android:text="+1" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <fragment
+            android:name="com.example.viewbinding.LeftFragment"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="5dp"
+            android:layout_weight="1"
+            android:tag="com.example.viewmodel.fragment.LeftFragment" />
+
+        <fragment
+            android:name="com.example.viewbinding.RightFragment"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="10dp"
+            android:layout_weight="1"
+            android:tag="com.example.viewmodel.fragment.RightFragment" />
+
+    </LinearLayout>
+
+
+</LinearLayout>
