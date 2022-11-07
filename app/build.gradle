@@ -1,4 +1,5 @@
 def cfg = rootProject.ext
+import org.tmatesoft.svn.core.wc.*
 
 //plugins {
 //    id 'com.android.application'
@@ -10,6 +11,7 @@ android {
     compileSdkVersion cfg.android.compileSdkVersion
     buildToolsVersion cfg.android.buildToolsVersion
 
+    //默认配置，会被buildTypes给覆盖掉重复项
     defaultConfig {
 
         applicationId cfg.applicationId.app
@@ -17,19 +19,116 @@ android {
         targetSdkVersion cfg.android.targetSdkVersion
         versionCode cfg.android.versionCode
         versionName cfg.android.versionName
+        // dex突破65535的限制
+        multiDexEnabled true
 
+        flavorDimensions versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
-
+    // buildTypes中配置的属性会覆盖defaultConfig中的定义
     buildTypes {
         release {
             minifyEnabled false
+
+            // 移除无用的resource文件
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
         }
     }
+
+    signingConfigs {
+        xiaomiapp {
+            keyAlias 'Component2022'
+            keyPassword 'pwd123456'
+            storeFile file('../key/Component2022.jks')
+            storePassword 'pwd123456'
+        }
+        huaweiapp {
+            keyAlias 'Component2022'
+            keyPassword 'pwd123456'
+            storeFile file('../key/Component2022.jks')
+            storePassword 'pwd123456'
+        }
+    }
+    // 多渠道打包
+    productFlavors {
+        DemoA {
+            applicationId "com.example.componentdemoA"
+            versionName cfg.android.versionName
+//            versionCode cfg.android.versionCode
+            // 使用svn提交的记录作为app版本号。也可以网上查找使用git提交的版本作为app版本号
+            versionCode MyFlavors.getVersionCode(versionName, (int) getSvnRevision())
+
+            //APP名称，可以在androidMainfest中引用
+            resValue "string", "app_name", "ComponentDemoA"
+
+            // 代码中可以这样使用该变量BuildConfig.AppPushType
+            buildConfigField "int", "AppPushType", "2"
+        }
+
+        DemoB {
+            applicationId "com.example.componentdemoB"
+            versionName cfg.android.versionName
+            versionCode cfg.android.versionCode
+
+
+            //APP名称，可以在androidMainfest中引用
+            resValue "string", "app_name", "ComponentDemoB"
+
+            // 代码中可以这样使用该变量BuildConfig.AppPushType
+            buildConfigField "int", "AppPushType", "2"
+        }
+
+        xiaomi {
+            //指定manifest中CHANNEL_VALUE的值
+            manifestPlaceholders = [CHANNEL_VALUE: "xiaomi"]
+            signingConfig signingConfigs.xiaomiapp
+
+            //APP名称，可以在androidMainfest中引用
+            resValue "string", "app_name", "xiaomiComponentDemo"
+        }
+        huawei {
+            manifestPlaceholders = [CHANNEL_VALUE: "huawei"]
+            signingConfig signingConfigs.huaweiapp
+
+            //APP名称，可以在androidMainfest中引用
+            resValue "string", "app_name", "huaweiComponentDemo"
+
+        }
+
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+// 获取svn提交记录版本
+def getSvnRevision() {
+    ISVNOptions options = SVNWCUtil.createDefaultOptions(true);
+    SVNClientManager clientManager = SVNClientManager.newInstance(options);
+    SVNStatusClient statusClient = clientManager.getStatusClient();
+    SVNStatus status = statusClient.doStatus(projectDir.getParentFile(), false);
+    SVNRevision revision = status.getCommittedRevision();
+    return revision.getNumber();
+}
+
+class MyFlavors {
+    static def getVersionCode(String name, int svnCode) {
+        def code = name.split("\\.")
+        if (code.length >= 3) {
+            return Integer.parseInt(code[0]) * 100 + Integer.parseInt(code[1]) * 10 + Integer.parseInt(code[2]) + svnCode
+        } else {
+            return Integer.parseInt(code[0]) * 100 + Integer.parseInt(code[1]) * 10 + svnCode
+        }
+    }
+
+    static def getVersionName(String versionName, int addVersion) {
+        def code = versionName.split("\\.")
+        def newVersion = versionName.replaceFirst(code[0], String.valueOf(String.valueOf(Integer.parseInt(code[0]) + addVersion)))
+        return newVersion
     }
 }
 
@@ -38,7 +137,7 @@ dependencies {
     implementation project(':modulesBase:libBase')
 
     // 正式打包情况下，依赖业务组件
-    if(!isModuleRun.toBoolean()){
+    if (!isModuleRun.toBoolean()) {
         implementation project(':modulesCore:main')
         implementation project(':modulesCore:login')
         implementation project(':modulesCore:ffmpeg')
