@@ -1,0 +1,97 @@
+def cfg = rootProject.ext
+
+// 通过apply方式，可以动态的指定是application还是library
+if (isModuleRun.toBoolean()) {
+    apply plugin: 'com.android.application'
+} else {
+    apply plugin: 'com.android.library'
+}
+
+apply plugin: 'kotlin-android'
+// room需要添加 kapt插件
+apply plugin: 'kotlin-kapt'
+
+android {
+    compileSdkVersion cfg.android.compileSdkVersion
+    buildToolsVersion cfg.android.buildToolsVersion
+
+    defaultConfig {
+        if (isModuleRun.toBoolean()) {
+            // 调试模式下，才有applicationId
+            applicationId cfg.applicationId.room
+        }
+        minSdkVersion cfg.android.minSdkVersion
+        targetSdkVersion cfg.android.targetSdkVersion
+        versionCode cfg.android.versionCode
+        versionName cfg.android.versionName
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // 注解处理器
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [AROUTER_MODULE_NAME: project.getName()]
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    // 使用viewbinding
+    viewBinding {
+        enabled = true
+    }
+
+    sourceSets {
+        main {
+            if (isModuleRun.toBoolean()) {
+                // 调试模式时，该组件为application，所以清单文件中需要定义应用类型的xml文件
+                manifest.srcFile 'src/main/debug/AndroidManifest.xml'
+            } else {
+                // 正式模式时，该组件为library，所以清单文件中需要定义库类型的xml文件
+                manifest.srcFile 'src/main/AndroidManifest.xml'
+            }
+        }
+    }
+}
+
+dependencies {
+
+    // 业务组件依赖基础组件，不需要单独添加依赖库
+    // implementation是不可传递的依赖。业务组件使用的库，无需再传递给其他组件。api是可传递的依赖
+    implementation project(':modulesBase:libBase')
+
+    // 注解处理器
+    annotationProcessor cfg.libARouterCompiler
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation 'androidx.core:core-ktx:1.3.1'
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'com.google.android.material:material:1.2.1'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+
+
+    //Room数据库
+    def room_version = "2.2.6"
+    implementation "androidx.room:room-runtime:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    // optional - Kotlin Extensions and Coroutines support for Room
+    implementation "androidx.room:room-ktx:$room_version"
+
+}

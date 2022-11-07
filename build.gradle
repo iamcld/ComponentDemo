@@ -49,6 +49,7 @@ ext {
             "livedata"  : "com.example.livedata",
             "viewmodel"  : "com.example.viewmodel",
             "viewbinding"  : "com.example.viewbinding",
+            "room"  : "com.example.room",
             "ffmpeg"  : "com.example.ffmpeg"
     ]
 
