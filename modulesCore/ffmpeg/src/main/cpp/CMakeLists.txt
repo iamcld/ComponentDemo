@@ -1,48 +1,48 @@
-# For more information about using CMake with Android Studio, read the
-# documentation: https://d.android.com/studio/projects/add-native-code.html
-
-# Sets the minimum version of CMake required to build the native library.
-
 cmake_minimum_required(VERSION 3.10.2)
 
 # Declares and names the project.
-
 project("ffmpeg")
 
-# Creates and names a library, sets it as either STATIC
-# or SHARED, and provides the relative paths to its source code.
-# You can define multiple libraries, and CMake builds them for you.
-# Gradle automatically packages shared libraries with your APK.
+#CMAKE_SOURCE_DIR： 最外层CMakeLists.txt所在目录
+#编译的源码文件
+file(GLOB SOURCE ${CMAKE_SOURCE_DIR}/*.cpp ${CMAKE_SOURCE_DIR}/*.h)
 
-add_library( # Sets the name of the library.
-        ffmpeg
+#add_library(
+#        #设置生成的库名
+#        ffmpegLibDemo
+#        #设置成动态库。SHARED：生成动态库  STATIC：生成静态库
+#        SHARED
+#        #库源码文件
+#        ffmpeg.cpp)
 
-        # Sets the library as a shared library.
+add_library(
+        ffmpegLibDemo
         SHARED
+        ${SOURCE}
+)
 
-        # Provides a relative path to your source file(s).
-        ffmpeg.cpp)
+#NDK日志库
+find_library(log-lib log)
 
-# Searches for a specified prebuilt library and stores the path as a
-# variable. Because CMake includes system libraries in the search path by
-# default, you only need to specify the name of the public NDK library
-# you want to add. CMake verifies that the library exists before
-# completing its build.
+#导入编译时头文件
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
-find_library( # Sets the name of the path variable.
-        log-lib
+#设置链接静态库的目录，全部静态库
+set(my_lib_path ${CMAKE_SOURCE_DIR}/libs/${CMAKE_ANDROID_ARCH_ABI})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -L${my_lib_path}" )
 
-        # Specifies the name of the NDK library that
-        # you want CMake to locate.
-        log)
+# 增加库文件,单个静态库
+#add_library(x264 STATIC IMPORTED)
+#set_target_properties(avcodec
+#        PROPERTIES IMPORTED_LOCATION ${PRJ_SOURCE_DIR}/lib/${ANDROID_ABI}/libavcodec.a)
 
-# Specifies libraries CMake should link to your target library. You
-# can link multiple libraries, such as libraries you define in this
-# build script, prebuilt third-party libraries, or system libraries.
-
-target_link_libraries( # Specifies the target library.
-        ffmpeg
-
-        # Links the target library to the log library
-        # included in the NDK.
+# 注意，如果 libA 需要依赖 libB,那libB 必须排到 libA 后面
+target_link_libraries(
+        #目标库：设置生成的库名
+        ffmpegLibDemo
+        # 链接静态库和NDK库到目标库中
+        avfilter avformat avcodec avutil swresample swscale
+        android
+        z
+        OpenSLES
         ${log-lib})

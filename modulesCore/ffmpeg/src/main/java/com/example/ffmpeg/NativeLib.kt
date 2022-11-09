@@ -9,9 +9,9 @@ class NativeLib {
     external fun stringFromJNI(): String
 
     companion object {
-        // Used to load the 'ffmpeg' library on application startup.
+        // Used to load the 'ffmpegLibDemo' library on application startup.
         init {
-            System.loadLibrary("ffmpeg")
+            System.loadLibrary("ffmpegLibDemo")
         }
     }
 }

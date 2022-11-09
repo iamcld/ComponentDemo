@@ -8,7 +8,8 @@ if (isModuleRun.toBoolean()) {
 }
 
 apply plugin: 'kotlin-android'
-
+//使用此插件，可以直接使用layout id 名称获取当前view对象。不过目前推荐使用jetpack的databing
+apply plugin: 'kotlin-android-extensions'
 android {
     compileSdkVersion cfg.android.compileSdkVersion
     buildToolsVersion cfg.android.buildToolsVersion
