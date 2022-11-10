@@ -29,11 +29,10 @@ extern "C" {
 class BaseChannel {
 public:
     BaseChannel(int id, JavaCallHelper *javaCallHelper, AVCodecContext *codecContext,
-                AVRational time_base)
-            : channelId(id),
+                AVRational time_base): channelId(id),
               javaCallHelper(javaCallHelper),
               avCodecContext(codecContext),
-              time_base(time_base) {
+              time_base(time_base){
         LOGD("构造函数BaseChannel()---->");
     }
 
@@ -49,11 +48,13 @@ public:
         //销毁队列 ,此处有问题safe_queue.clear()，SafeQueue结构体未明确.
         pkt_queue.clear();
         frame_queue.clear();
+        LOGE("释放channel:%d %d" , pkt_queue.size(), frame_queue.size());
     }
 
-    static void releaseAvPack(AVPacket *&packet) {
+    static void releaseAvPacket(AVPacket *&packet) {
         if (packet) {
             av_packet_free(&packet);
+            packet = 0;
         }
     }
 
@@ -66,16 +67,16 @@ public:
     /**
      * 播放音频或视频.
      */
-    virtual void play() = 0;
-    /**
-     * 停止播放音频或视频.
-     */
-    virtual void stop() = 0;
-    /**
-     * seek video.
-     * @param ms
-     */
-    virtual void seek(long ms) = 0;
+//    virtual void play() = 0;
+//    /**
+//     * 停止播放音频或视频.
+//     */
+//    virtual void stop() = 0;
+//    /**
+//     * seek video.
+//     * @param ms
+//     */
+//    virtual void seek(long ms) = 0;
 
 public:
     SafeQueue<AVPacket *> pkt_queue;//未解码帧队列

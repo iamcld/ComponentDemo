@@ -87,8 +87,8 @@ public:
             pthread_cond_wait(&cond, &mutex);
         }
         if (!q.empty()) {
-            value = q.front();
-            q.pop();
+            value = q.front();//取队列首个元素，不出队
+            q.pop();//出队
             ret = 1;
         }
         pthread_mutex_unlock(&mutex);

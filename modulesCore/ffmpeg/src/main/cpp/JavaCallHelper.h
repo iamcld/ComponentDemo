@@ -7,6 +7,8 @@
 
 #include <jni.h>
 
+#define THREAD_MAIN 1
+#define THREAD_CHILD 2
 
 class JavaCallHelper {
 public:

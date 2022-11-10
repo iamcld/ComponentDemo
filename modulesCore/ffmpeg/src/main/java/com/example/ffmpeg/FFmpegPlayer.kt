@@ -38,27 +38,17 @@ object FFmpegPlayer : SurfaceHolder.Callback {
     external fun nativeClose()
 
     /***回调方法***/
-    /***回调方法 */
-    /**
-     * c层准备完毕.
-     */
-    fun onPrepare() {
+    //c层准备完毕.
+    fun onNativePrepare() {
         playStatusListener?.onPrepare()
     }
-
-    /**
-     * 回调播放进度.
-     * @param progress
-     */
-    fun onProgress(progress: Int) {
+    //回调播放进度.
+    fun onNativeProgress(progress: Int) {
         playStatusListener?.onProgress(progress)
     }
 
-    /**
-     * 播放出错.
-     * @param errorCode
-     */
-    fun onError(errorCode: Int) {
+    //播放出错.
+    fun onNativeError(errorCode: Int) {
         playStatusListener?.onError(errorCode)
     }
 

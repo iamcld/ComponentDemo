@@ -1,11 +1,11 @@
+#目前发现新添加cpp文件或者cpp文件重命名，需要重新同步下cmake文件，cpp文件才能找到生效，暂时还不知道原因
 cmake_minimum_required(VERSION 3.10.2)
-
-# Declares and names the project.
-project("ffmpeg")
-
-#CMAKE_SOURCE_DIR： 最外层CMakeLists.txt所在目录
+#CMAKE_SOURCE_DIR： 最外层CMakeLists.txt所在目录即/cpp目录
 #编译的源码文件
-file(GLOB SOURCE ${CMAKE_SOURCE_DIR}/*.cpp ${CMAKE_SOURCE_DIR}/*.h)
+file(GLOB SOURCE_PATH ${CMAKE_SOURCE_DIR}/*.cpp ${CMAKE_SOURCE_DIR}/*.h)
+
+#设置生成的so动态库最后输出的路径，默认编译产出路径在build/intermediates/cmake/debug/obj
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/output/${ANDROID_ABI})
 
 #add_library(
 #        #设置生成的库名
@@ -18,7 +18,7 @@ file(GLOB SOURCE ${CMAKE_SOURCE_DIR}/*.cpp ${CMAKE_SOURCE_DIR}/*.h)
 add_library(
         ffmpegLibDemo
         SHARED
-        ${SOURCE}
+        ${SOURCE_PATH}
 )
 
 #NDK日志库
