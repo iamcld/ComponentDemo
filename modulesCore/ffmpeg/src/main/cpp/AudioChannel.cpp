@@ -22,3 +22,17 @@ AudioChannel::AudioChannel(int id, JavaCallHelper *javaCallHelper, AVCodecContex
     pkt_queue.setReleaseCallback(releaseAvPacket);
     frame_queue.setReleaseCallback(releaseAvFrame);
 }
+
+void AudioChannel::play() {
+    LOGE("音频 play().....");
+
+}
+
+void AudioChannel::stop() {
+    LOGE("音频 stop().....");
+
+}
+
+void AudioChannel::seek(long ms) {
+    LOGE("VideoChannel::seek has not implemeted!");
+}

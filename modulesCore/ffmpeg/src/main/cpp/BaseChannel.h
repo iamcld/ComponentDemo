@@ -67,16 +67,16 @@ public:
     /**
      * 播放音频或视频.
      */
-//    virtual void play() = 0;
-//    /**
-//     * 停止播放音频或视频.
-//     */
-//    virtual void stop() = 0;
-//    /**
-//     * seek video.
-//     * @param ms
-//     */
-//    virtual void seek(long ms) = 0;
+    virtual void play() = 0;
+    /**
+     * 停止播放音频或视频.
+     */
+    virtual void stop() = 0;
+    /**
+     * seek video.
+     * @param ms
+     */
+    virtual void seek(long ms) = 0;
 
 public:
     SafeQueue<AVPacket *> pkt_queue;//未解码帧队列

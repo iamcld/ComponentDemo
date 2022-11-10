@@ -19,14 +19,14 @@ public:
     /**
      * 播放音频或视频.
      */
-//    virtual void play();
-//
-//    /**
-//      * 停止播放音频或视频.
-//      */
-//    virtual void stop();
-//
-//    virtual void seek(long ms);
+    virtual void play();
+
+    /**
+      * 停止播放音频或视频.
+      */
+    virtual void stop();
+
+    virtual void seek(long ms);
 
     void initOpenSL();
 

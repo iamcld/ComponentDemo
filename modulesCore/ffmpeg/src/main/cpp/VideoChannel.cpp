@@ -48,6 +48,19 @@ VideoChannel::VideoChannel(int id, JavaCallHelper *javaCallHelper, AVCodecContex
     frame_queue.setSyncHandle(dropFrame);
 }
 
+void VideoChannel::play() {
+    LOGE("视频play().....");
+
+}
+
+void VideoChannel::stop() {
+
+}
+
+void VideoChannel::seek(long ms) {
+    LOGE("VideoChannel::seek has not implemeted!");
+}
+
 void VideoChannel::setRenderFrame(RenderFrame renderFrame) {
     this->renderFrame = renderFrame;
 }
