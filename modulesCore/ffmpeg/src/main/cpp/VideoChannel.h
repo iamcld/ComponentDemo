@@ -57,7 +57,7 @@ private:
     int fps;
 
 public:
-    AudioChannel *audioChannel;//音视频同步使用
+    AudioChannel *audioChannel = NULL;//音视频同步使用
     double clock;//音视频同步使用
 };
 

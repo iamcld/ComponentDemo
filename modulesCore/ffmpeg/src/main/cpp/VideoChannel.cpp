@@ -37,7 +37,8 @@ VideoChannel::VideoChannel(int id, JavaCallHelper *javaCallHelper, AVCodecContex
                            AVRational time_base, AVFormatContext *formatContext)
         : BaseChannel(id, javaCallHelper, avCodecContext, time_base) {
     LOGE("构造函数VideoChannel.....");
-
+    //指针成员需要初始化，指向地址0处。否则会指向一个未知地址。
+    // 导致未初始化的指针变量if（audioChannel）为true(audioChannel=0x12df41a812e98010，非0返回true)
     this->javaCallHelper = javaCallHelper;
     this->avCodecContext = avCodecContext;
     this->avFormatContext = formatContext;
@@ -230,9 +231,13 @@ void VideoChannel::synchronizeFrame() {
     }
 
     //释放资源
-    av_free(&dst_data[0]);
+    if (dst_data[0]) {
+        av_free(dst_data[0]);
+    }
     isPlaying = false;
-    releaseAvFrame(frame);
+    if (frame) {
+        releaseAvFrame(frame);
+    }
     sws_freeContext(swsContext);
 }
 

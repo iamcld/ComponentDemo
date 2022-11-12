@@ -23,8 +23,8 @@ public:
     void onError(int thread, int code);
 
 private:
-    JavaVM *javaVm;
-    JNIEnv *env;
+    JavaVM *javaVm = NULL;
+    JNIEnv *env = NULL;
     jobject jobj;
     jmethodID jmethodId_prepare;
     jmethodID jmethodId_error;

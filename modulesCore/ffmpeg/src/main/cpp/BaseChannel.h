@@ -83,9 +83,9 @@ public:
     SafeQueue<AVFrame *> frame_queue;// 解码帧队列
     volatile int channelId;
     volatile bool isPlaying;
-    AVCodecContext *avCodecContext;
-    AVFormatContext *avFormatContext;
-    JavaCallHelper *javaCallHelper;
+    AVCodecContext *avCodecContext = NULL;
+    AVFormatContext *avFormatContext = NULL;
+    JavaCallHelper *javaCallHelper = NULL;
     AVRational time_base;
 };
 

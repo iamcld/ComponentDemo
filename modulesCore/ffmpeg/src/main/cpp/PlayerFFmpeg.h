@@ -69,11 +69,11 @@ private:
     bool isPlaying;
     pthread_t pid_prepare;// 准备完成后销毁
     pthread_t pid_play;// 解码线程，一直存在知道播放完成
-    char *url;
-    AVFormatContext *avFormatContext;
-    JavaCallHelper *javaCallHelper;
-    VideoChannel *videoChannel;
-    AudioChannel *audioChannel;
+    char *url = NULL;
+    AVFormatContext *avFormatContext = NULL;
+    JavaCallHelper *javaCallHelper = NULL;
+    VideoChannel *videoChannel = NULL;
+    AudioChannel *audioChannel = NULL;
     RenderFrame renderFrame;
 
 };

@@ -43,7 +43,7 @@ private:
     int out_sample_rate;//采样频率
 
 public:
-    uint8_t *buffer;
+    uint8_t *buffer = NULL;
     double clock;//音视频同步使用
 };
 

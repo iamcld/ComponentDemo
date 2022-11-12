@@ -15,10 +15,11 @@ extern "C"
 
 JavaCallHelper *javaCallHelper;
 
+//stdio.h中定义 #define NULL 0.即空指针指向地址0
 //子线程想要回调java层就必须要先绑定到jvm.
 JavaVM *javaVm = NULL;
 PlayerFFmpeg *playerFFmpeg = NULL;
-
+//绘图窗口.等价于 *window = NULL
 ANativeWindow *window = 0;
 
 extern "C" JNIEXPORT jstring JNICALL
