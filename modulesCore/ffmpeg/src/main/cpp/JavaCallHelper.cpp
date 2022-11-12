@@ -15,7 +15,7 @@ JavaCallHelper::JavaCallHelper(JavaVM *_javaVM, JNIEnv *_env, jobject &_obj) : j
     //获取java层jclassz对象的方法
     jmethodId_prepare = env->GetMethodID(jclassz, "onNativePrepare", "()V");
     jmethodId_progress = env->GetMethodID(jclassz, "onNativeProgress", "(I)V");
-    jmethodId_error = env->GetMethodID(jclassz, "onNativePrepare", "(I)V");
+    jmethodId_error = env->GetMethodID(jclassz, "onNativeError", "(I)V");
 }
 
 JavaCallHelper::~JavaCallHelper() {

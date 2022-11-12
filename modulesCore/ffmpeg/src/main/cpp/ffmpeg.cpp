@@ -17,7 +17,9 @@ JavaCallHelper *javaCallHelper;
 
 //子线程想要回调java层就必须要先绑定到jvm.
 JavaVM *javaVm = NULL;
-PlayerFFmpeg* playerFFmpeg = NULL;
+PlayerFFmpeg *playerFFmpeg = NULL;
+
+ANativeWindow *window = 0;
 
 extern "C" JNIEXPORT jstring JNICALL
 Java_com_example_ffmpeg_NativeLib_stringFromJNI(
@@ -35,6 +37,38 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     return JNI_VERSION_1_4;
 }
 
+/**
+ *渲染窗口回调接口
+ * @param data
+ * @param linesize
+ * @param w
+ * @param h
+ */
+void renderFrame(uint8_t *data, int linesize, int w, int h) {
+    LOGD("renderFrame start--------->");
+    //对本窗口设置缓冲区大小RGBA
+    ANativeWindow_setBuffersGeometry(window, w, h, WINDOW_FORMAT_RGBA_8888);
+    ANativeWindow_Buffer windowBuffer;
+    if (ANativeWindow_lock(window, &windowBuffer, 0)) {
+        ANativeWindow_release(window);
+        window = 0;
+        return;
+    }
+
+    // 拿到window的缓冲区，window_data[0]=225就代表刷新了红色
+    uint8_t *window_data = static_cast<uint8_t *>(windowBuffer.bits);
+    //window_data = data,r g b a每个元素占用4bit
+    int window_linesize = windowBuffer.stride * 4;
+    uint8_t *str_data = data;
+    // 按行拷贝rgba数据到window_buffer里面
+    for (int i = 0; i < windowBuffer.height; ++i) {
+        //以目的地为准，逐行拷贝
+        memcpy(window_data + i * window_linesize, str_data + i * window_linesize, window_linesize);
+    }
+    ANativeWindow_unlockAndPost(window);
+    LOGD("renderFrame finish---------->");
+}
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_example_ffmpeg_FFmpegPlayer_nativePrepare(JNIEnv *env, jobject thiz, jstring url) {
@@ -43,5 +77,66 @@ Java_com_example_ffmpeg_FFmpegPlayer_nativePrepare(JNIEnv *env, jobject thiz, js
     //实现一个控制类
     javaCallHelper = new JavaCallHelper(javaVm, env, thiz);
     playerFFmpeg = new PlayerFFmpeg(javaCallHelper, input);
+    //设置回调监听
+    playerFFmpeg->setRenderCallBack(renderFrame);
+    // 进行准备
+    playerFFmpeg->prepare();
+    // 释放资源
+    env->ReleaseStringUTFChars(url, input);
 
 }
+
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_ffmpeg_FFmpegPlayer_nativeSetSurface(JNIEnv *env, jobject thiz, jobject surface) {
+    LOGD("set native surface invocked");
+    //释放之前的window实例
+    if (window) {
+        ANativeWindow_release(window);
+        window = 0;
+    }
+    //创建AWindow
+    window = ANativeWindow_fromSurface(env, surface);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_ffmpeg_FFmpegPlayer_nativeStart(JNIEnv *env, jobject thiz) {
+    //正式进入播放界面
+    if (playerFFmpeg) {
+        playerFFmpeg->start();
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_ffmpeg_FFmpegPlayer_nativeSeek(JNIEnv *env, jobject thiz, jlong ms) {
+
+    if (playerFFmpeg) {
+        playerFFmpeg->seek(ms);
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_ffmpeg_FFmpegPlayer_nativePause(JNIEnv *env, jobject thiz) {
+
+    if (playerFFmpeg) {
+        playerFFmpeg->pause();
+    }
+}
+
+/**
+ * 关闭解码线程，释放资源
+ */
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_example_ffmpeg_FFmpegPlayer_nativeClose(JNIEnv *env, jobject thiz) {
+    if (playerFFmpeg) {
+        playerFFmpeg->close();
+    }
+}
+
+
+

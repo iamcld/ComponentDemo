@@ -126,7 +126,7 @@ void PlayerFFmpeg::prepareFFmpeg() {
             // 音频流解码帧时间戳 timebase = 分子/分母
             LOGD("* * * * * * Audio stream timebase is! * * * * * * * * * %d/%d",
                  stream->time_base.num, stream->time_base.den);
-        } else {
+        } else if (AVMEDIA_TYPE_VIDEO == codecParameters->codec_type){
             // 视频流解码帧时间戳 timebase = 分子/分母
             LOGE("* * * * * * Video stream timebase is! * * * * * * * * * %d/%d",
                  stream->time_base.num, stream->time_base.den);
@@ -135,12 +135,155 @@ void PlayerFFmpeg::prepareFFmpeg() {
             int fps = av_q2d(avFrameRate);
 
             // 视频流
-            videoChannel = new VideoChannel(i, javaCallHelper, codecContext, stream->time_base,avFormatContext);
+            videoChannel = new VideoChannel(i, javaCallHelper, codecContext, stream->time_base,
+                                            avFormatContext);
             videoChannel->setRenderFrame(renderFrame);
             videoChannel->setFps(fps);
         }
 
     }
 
+    // 音视频都没有则抛出错误。没有满足规则的流
+    if (!audioChannel && !videoChannel) {
+        if (javaCallHelper) {
+            javaCallHelper->onError(THREAD_CHILD, FFMPEG_NO_MEDIA);
+        }
+        return;
+    }
 
+    //  获取音视对象，音视频同步用
+    videoChannel->audioChannel = audioChannel;
+    // 回调，准备完成工作
+    if (javaCallHelper) {
+        javaCallHelper->onPrepare(THREAD_CHILD);
+    }
+}
+
+void PlayerFFmpeg::setRenderCallBack(RenderFrame renderFrame) {
+    this->renderFrame = renderFrame;
+}
+
+void *startThread(void *args) {
+    PlayerFFmpeg *playerFFmpeg = static_cast<PlayerFFmpeg *>(args);
+    playerFFmpeg->play();
+    return 0;
+}
+
+/**
+ * 打开播放标志，开始解码
+ */
+void PlayerFFmpeg::start() {
+    //播放成功
+    isPlaying = true;
+    //开启解码
+    //音频解码
+    LOGE("* * * * * * audioChannel * * * * * * * * * ");
+    if (audioChannel) {
+        LOGE("* * * * * * audioChannel->play() * * * * * * * * * ");
+        /**
+        * 日志崩溃在audioChannel->play()
+        * 但奇怪的是，已经判断指针audioChannel不为空才走进来，为啥还会出错
+        * 为啥呢？因为
+        * audioChannel定义了，但是没初始化，所以和JAVA不一样的是，对C++来说，只要生成了PoeFFmpeg对象，则内部的audioChannel指针就不是为空！
+        * 所以声明指针变量指需要复初始值NULL
+        */
+        audioChannel->play();
+    }
+    LOGE("* * * * * * videoChannel * * * * * * * * * ");
+    // 视频解码.
+    if (videoChannel) {
+        LOGE("* * * * * * videoChannel->play() * * * * * * * * * ");
+        //开启视频解码线程，读取packet->frame->synchronized->window_buffer
+        videoChannel->play();
+    }
+
+    LOGE("* * * * * * pthread_create * * * * * * * * * ");
+    //视频播放的时候开启一个解码线程.解码packet.
+    pthread_create(&pid_play, NULL, startThread, this);
+}
+
+/**
+ *  在子线程中执行播放解码
+ */
+void PlayerFFmpeg::play() {
+    int ret = 0;
+    while (isPlaying) {
+        // 如果队列数据大于100，则延缓解码速度
+        if (audioChannel && audioChannel->pkt_queue.size() > 100) {
+            // 生产者的速度远远大于消费，需要延迟10ms
+            av_usleep(1000 * 10);
+            continue;
+        }
+
+        // 如果队列数据大于100，则延缓解码速度
+        if (videoChannel && videoChannel->pkt_queue.size() > 100) {
+            // 生产者的速度远远大于消费，需要延迟10ms
+            av_usleep(1000 * 10);
+            continue;
+        }
+
+        //读取包
+        AVPacket *packet = av_packet_alloc();
+        //从媒体中读取音视频的packet包
+        ret = av_read_frame(avFormatContext, packet);
+        if (ret == 0) {
+            // 将同一id的音频或者视频流数据包加入队列
+            if (audioChannel && packet->stream_index == audioChannel->channelId) {
+                LOGE("audioChannel->pkt_queue.enQueue(packet):%d", audioChannel->pkt_queue.size());
+                audioChannel->pkt_queue.enQueue(packet);
+            } else if (videoChannel && packet->stream_index == videoChannel->channelId) {
+                LOGE("videoChannel->pkt_queue.enQueue(packet):%d", videoChannel->pkt_queue.size());
+                videoChannel->pkt_queue.enQueue(packet);
+            }
+        } else if (ret == AVERROR_EOF) {
+            //读取完毕，但是不一定播放完毕
+            if (videoChannel->pkt_queue.empty() && videoChannel->frame_queue.empty()
+                && audioChannel->pkt_queue.empty() && audioChannel->frame_queue.empty())
+                LOGD("播放完毕");
+            break;
+        } else {
+            //因为存在seek的原因，就算读取完毕，依然要循环 去执行av_read_frame(否则seek了没用...)
+            break;
+        }
+    }
+
+    isPlaying = false;
+    if (audioChannel) {
+        audioChannel->stop();
+    }
+
+    if (videoChannel) {
+        videoChannel->stop();
+    }
+}
+
+void PlayerFFmpeg::pause() {
+    //先关闭播放状态.
+//    isPlaying = false;
+}
+
+void PlayerFFmpeg::close() {
+    //先关闭播放状态.
+    isPlaying = false;
+    //停止prepare线程.
+    pthread_join(pid_prepare, NULL);
+    //停止play线程
+    pthread_join(pid_play, NULL);
+
+//    if (audioChannel) {
+//        audioChannel->stop();
+//    }
+//    if (videoChannel) {
+//        videoChannel->stop();
+//    }
+}
+
+//seek the frame to dest .
+void PlayerFFmpeg::seek(long ms) {
+    //优先seek audio,如果没有audio则seek视频.
+    if (audioChannel) {
+        audioChannel->seek(ms);
+    } else if (videoChannel) {
+        videoChannel->seek(ms);
+    }
 }

@@ -1,3 +1,4 @@
+package com.example.ffmpeg
 import android.view.Surface
 import android.view.SurfaceHolder
 import android.view.SurfaceView
@@ -7,15 +8,16 @@ import android.view.SurfaceView
  * @Date: 2022/11/8 13:41
  * @Description:
  */
-object FFmpegPlayer : SurfaceHolder.Callback {
+class FFmpegPlayer : SurfaceHolder.Callback {
 
     private var surfaceHolder: SurfaceHolder? = null;
     private var playStatusListener: PlayStatusListener? = null
     private var mSource: String = ""
 
-
-    init {
-        System.loadLibrary("ffmpegLibDemo")
+    companion object {
+        init {
+            System.loadLibrary("ffmpegLibDemo")
+        }
     }
 
 

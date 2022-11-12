@@ -1,6 +1,5 @@
 package com.example.ffmpeg
 
-import FFmpegPlayer
 import android.Manifest
 import android.os.Build
 import android.os.Bundle
@@ -79,6 +78,7 @@ class FFmpegActivity : AppCompatActivity() {
     }
 
     private fun initFFmpegPlayer() {
+        fFmpegPlayer = FFmpegPlayer()
         fFmpegPlayer?.setSurfaceView(surface_view)
     }
 
@@ -101,6 +101,8 @@ class FFmpegActivity : AppCompatActivity() {
             }
 
         })
+        fFmpegPlayer?.prepare()
+
     }
 
     override fun onDestroy() {
