@@ -16,6 +16,7 @@ extern "C"
 JavaCallHelper *javaCallHelper;
 
 //stdio.h中定义 #define NULL 0.即空指针指向地址0
+//在C语言使用NULL表示空指针，java使用null表示空指针，Object-C使用nil表示空指针。当然，今天的主角是C++，它使用nullptr表示空指针。
 //子线程想要回调java层就必须要先绑定到jvm.
 JavaVM *javaVm = NULL;
 PlayerFFmpeg *playerFFmpeg = NULL;
@@ -32,7 +33,7 @@ Java_com_example_ffmpeg_NativeLib_stringFromJNI(
     return env->NewStringUTF(hello.c_str());
 }
 
-//这个类似android的生命周期，加载jni的时候会自己调用
+//这个类似android的生命周期，当调用System.loadLibrary时，会回调这个方法
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
     javaVm = vm;
     return JNI_VERSION_1_4;
@@ -40,6 +41,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 
 /**
  *渲染窗口回调接口
+ * 只需要不断的往Nativie Windows缓冲区进行拷贝数据，就能完成绘制
  * @param data
  * @param linesize
  * @param w
@@ -63,11 +65,12 @@ void renderFrame(uint8_t *data, int linesize, int w, int h) {
     uint8_t *str_data = data;
     // 按行拷贝rgba数据到window_buffer里面
     for (int i = 0; i < windowBuffer.height; ++i) {
-        //以目的地为准，逐行拷贝
+        //由于window的stride和帧的stride不同,因此需要逐行复制
+        //以目的地为准，逐行拷贝。这样就可以进行绘制
         memcpy(window_data + i * window_linesize, str_data + i * window_linesize, window_linesize);
     }
     ANativeWindow_unlockAndPost(window);
-    LOGD("renderFrame finish---------->");
+    LOGD("func__renderFrame finish---------->%d", __LINE__);
 }
 
 extern "C"

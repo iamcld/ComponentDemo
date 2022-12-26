@@ -79,6 +79,7 @@ void PlayerFFmpeg::prepareFFmpeg() {
         if (javaCallHelper) {
             javaCallHelper->onError(THREAD_CHILD, FFMPEG_CAN_NOT_FIND_STREAMS);
         }
+        return;
     }
 
     // 遍历文件流类型：音频流和视频流
@@ -134,6 +135,7 @@ void PlayerFFmpeg::prepareFFmpeg() {
             AVRational avFrameRate = stream->avg_frame_rate;
             int fps = av_q2d(avFrameRate);
 
+//            每一帧的时间即为1/fps
             // 视频流
             videoChannel = new VideoChannel(i, javaCallHelper, codecContext, stream->time_base,
                                             avFormatContext);
@@ -243,6 +245,7 @@ void PlayerFFmpeg::play() {
             break;
         } else {
             //因为存在seek的原因，就算读取完毕，依然要循环 去执行av_read_frame(否则seek了没用...)
+            LOGD("av_read_frame ret = %d",ret);
             break;
         }
     }

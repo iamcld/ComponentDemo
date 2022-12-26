@@ -60,14 +60,24 @@ void AudioChannel::play() {
     isPlaying = true;
 
     //创建初始化OPENSL_ES的线程
+    //创建音频解码线程
+    //播放线程 frame->yuv.
     pthread_create(&pid_audio_play, NULL, audioPlay, this);
     pthread_create(&pid_audio_decode, NULL, audioDecode, this);
 
 }
 
 void AudioChannel::stop() {
-    LOGE("音频 stop().....");
-
+    LOGE("音频 stop()..... line=%d", __LINE__);
+    //1. set the playing flag false.
+    isPlaying = false;
+    //2. release thread deque packet thread .
+    pthread_join(pid_audio_decode,NULL);
+    //3. release the synchronize thread for frame transform and render .
+    pthread_join(pid_audio_play,NULL);
+    //4. clear the queue .
+    pkt_queue.clear();
+    frame_queue.clear();
 }
 
 void AudioChannel::seek(long ms) {

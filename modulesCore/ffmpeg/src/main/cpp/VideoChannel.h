@@ -58,7 +58,7 @@ private:
 
 public:
     AudioChannel *audioChannel = NULL;//音视频同步使用
-    double clock;//音视频同步使用
+    double clock;//音视频同步使用，视频pts
 };
 
 #endif //COMPONENTDEMO_VIDEOCHANNEL_H

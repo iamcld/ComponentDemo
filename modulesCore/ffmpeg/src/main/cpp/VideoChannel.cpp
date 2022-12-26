@@ -146,7 +146,7 @@ void VideoChannel::decodePacket() {
 }
 
 void VideoChannel::synchronizeFrame() {
-    //从视频流中读取数据包
+    //转码上下文：将YUV数据转为RGB。从视频流中读取数据包
     SwsContext *swsContext = sws_getContext(
             avCodecContext->width, avCodecContext->height,
             avCodecContext->pix_fmt,
@@ -163,7 +163,7 @@ void VideoChannel::synchronizeFrame() {
                    AV_PIX_FMT_RGBA, 1);
 
     //绘制界面
-    //转化：YUV->RGB
+    //转化：一帧YUV数据转为图片---> image(dst_data存储的就是一张图片)  -----》将图片渲染到surface中
     AVFrame *frame = 0;
     while (isPlaying) {
         int ret = frame_queue.deQueue(frame);
@@ -174,10 +174,18 @@ void VideoChannel::synchronizeFrame() {
             continue;
         }
 
+        /**
+         * 处理图像数据：视频缩放
+         * 函数主要是用来做视频像素格式和分辨率的转换，其优势在于：可以在同一个函数里实现：
+         * 1.图像色彩空间转换，
+         * 2:分辨率缩放，
+         * 3:前后图像滤波处理。
+         * 不足之处在于：效率相对较低，不如libyuv或shader
+         */
         LOGE("synchronizeFrame！get frame success : %d", frame_queue.size());
         sws_scale(swsContext, frame->data, frame->linesize, 0, frame->height, dst_data,
                   dst_linesize);
-        //已经获取了rgb数据，则回调给native-lib层使用.
+        //已经获取了rgb数据，则回调给ffmpeg.cpp层使用，进行画面渲染
         renderFrame(dst_data[0], dst_linesize[0], avCodecContext->width, avCodecContext->height);
         //暂时没有来做到音视频同步，所以渲染一帧，等待16ms.
         LOGE("解码一帧视频 视频总缓存size:  %d", frame_queue.size());
@@ -188,10 +196,11 @@ void VideoChannel::synchronizeFrame() {
 
         //解码一帧视频延时时间
         double frame_delay = 1.0 / fps;
-        //解码一帧花费的时间. 配置差的手机 解码耗时教旧，所以需要考虑解码时间.
+        //解码时间：解码一帧花费的时间. 配置差的手机 解码耗时教旧，所以需要考虑解码时间.
         double extra_delay = frame->repeat_pict / (2 * fps);
         double delay = frame_delay + extra_delay;
 
+        // 音频pts
         double audioClock = audioChannel->clock;
         double diff = clock - audioClock;
 
@@ -201,6 +210,12 @@ void VideoChannel::synchronizeFrame() {
         LOGE(" frame_delay %f", frame_delay);
         LOGE(" extra_delay %f", extra_delay);
 
+        /**
+         * 音视频同步方案：
+         * 取音频和视频的pts进行对比。
+         * 1.若视频pts比音频pts大，说明视频超前，视频播放线程要短暂休眠
+         * 2.若视频pts比音频pts小，说明音频超前，视频需要进行丢帧
+         */
         LOGE("-----------相差----------  %f ", diff);
         if (clock > audioClock) {
             //视频超前，睡一会.

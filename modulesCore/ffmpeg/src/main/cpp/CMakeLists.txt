@@ -42,6 +42,7 @@ target_link_libraries(
         ffmpegLibDemo
         # 链接静态库和NDK库到目标库中
         avfilter avformat avcodec avutil swresample swscale
+        # android系统头文件android/native_window.h，故要引入libandroid.so库
         android
         z
         OpenSLES
